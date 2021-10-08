@@ -21,27 +21,30 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.Base58;
 
 final class SchemaRegistryContainer extends GenericContainer<SchemaRegistryContainer> {
-    public static final int SCHEMA_REGISTRY_PORT = 8081;
+  public static final int SCHEMA_REGISTRY_PORT = 8081;
 
-    public SchemaRegistryContainer(final KafkaContainer kafka) {
-        this("5.2.1", kafka);
-    }
+  public SchemaRegistryContainer(final KafkaContainer kafka) {
+    this("5.2.1", kafka);
+  }
 
-    public SchemaRegistryContainer(final String confluentPlatformVersion, final KafkaContainer kafka) {
-        super("confluentinc/cp-schema-registry:" + confluentPlatformVersion);
+  public SchemaRegistryContainer(
+      final String confluentPlatformVersion, final KafkaContainer kafka) {
+    super("confluentinc/cp-schema-registry:" + confluentPlatformVersion);
 
-        dependsOn(kafka);
-        withNetwork(kafka.getNetwork());
-        withNetworkAliases("schema-registry-" + Base58.randomString(6));
+    dependsOn(kafka);
+    withNetwork(kafka.getNetwork());
+    withNetworkAliases("schema-registry-" + Base58.randomString(6));
 
-        withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS",
-            String.format("PLAINTEXT://%s:%s", kafka.getNetworkAliases().get(0), 9092));
+    withEnv(
+        "SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS",
+        String.format("PLAINTEXT://%s:%s", kafka.getNetworkAliases().get(0), 9092));
 
-        withExposedPorts(SCHEMA_REGISTRY_PORT);
-        withEnv("SCHEMA_REGISTRY_HOST_NAME", "localhost");
-    }
+    withExposedPorts(SCHEMA_REGISTRY_PORT);
+    withEnv("SCHEMA_REGISTRY_HOST_NAME", "localhost");
+  }
 
-    public String getSchemaRegistryUrl() {
-        return String.format("http://%s:%s", getContainerIpAddress(), getMappedPort(SCHEMA_REGISTRY_PORT));
-    }
+  public String getSchemaRegistryUrl() {
+    return String.format(
+        "http://%s:%s", getContainerIpAddress(), getMappedPort(SCHEMA_REGISTRY_PORT));
+  }
 }

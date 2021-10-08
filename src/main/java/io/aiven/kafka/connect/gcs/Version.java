@@ -18,25 +18,25 @@ package io.aiven.kafka.connect.gcs;
 
 import java.io.InputStream;
 import java.util.Properties;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class Version {
-    private static final Logger log = LoggerFactory.getLogger(Version.class);
+  private static final Logger log = LoggerFactory.getLogger(Version.class);
 
-    private static final String PROPERTIES_FILENAME = "gcs-connector-for-apache-kafka-version.properties";
+  private static final String PROPERTIES_FILENAME =
+      "gcs-connector-for-apache-kafka-version.properties";
 
-    static final String VERSION;
+  static final String VERSION;
 
-    static {
-        final Properties props = new Properties();
-        try (final InputStream resourceStream =
-                 Version.class.getClassLoader().getResourceAsStream(PROPERTIES_FILENAME)) {
-            props.load(resourceStream);
-        } catch (final Exception e) {
-            log.warn("Error while loading {}: {}", PROPERTIES_FILENAME, e.getMessage());
-        }
-        VERSION = props.getProperty("version", "unknown").trim();
+  static {
+    final Properties props = new Properties();
+    try (final InputStream resourceStream =
+        Version.class.getClassLoader().getResourceAsStream(PROPERTIES_FILENAME)) {
+      props.load(resourceStream);
+    } catch (final Exception e) {
+      log.warn("Error while loading {}: {}", PROPERTIES_FILENAME, e.getMessage());
     }
+    VERSION = props.getProperty("version", "unknown").trim();
+  }
 }

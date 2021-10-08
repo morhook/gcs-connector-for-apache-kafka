@@ -16,15 +16,15 @@
 
 package io.aiven.kafka.connect.gcs;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 
 class GcsSinkConnectorTest {
 
-    @Test
-    void version() {
-        final GcsSinkConnector connector = new GcsSinkConnector();
-        assertEquals("test-version", connector.version());
-    }
+  @Test
+  void version() {
+    final GcsSinkConnector connector = new GcsSinkConnector();
+    assertEquals("test-version", connector.version());
+  }
 }
