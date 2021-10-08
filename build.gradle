@@ -35,6 +35,9 @@ plugins {
 
     // https://docs.gradle.org/current/userguide/signing_plugin.html
     id "signing"
+
+    // https://plugins.gradle.org/plugin/com.diffplug.spotless
+    id "com.diffplug.spotless" version "5.16.0"
 }
 
 group = "io.aiven"
@@ -207,6 +210,22 @@ dependencies {
 checkstyle {
     toolVersion "8.29"
     getConfigDirectory().set(rootProject.file("checkstyle/"))
+}
+
+spotless {
+  format 'misc', {
+    // define the files to apply `misc` to
+    target '*.gradle', '*.md', '.gitignore'
+
+    // define the steps to apply to those files
+    trimTrailingWhitespace()
+    indentWithSpaces()
+    endWithNewline()
+  }
+  java {
+    // apply a specific flavor of google-java-format
+    googleJavaFormat('1.11.0')
+  }
 }
 
 task integrationTest(type: Test) {
