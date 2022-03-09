@@ -18,6 +18,7 @@ package io.aiven.kafka.connect.gcs;
 
 import java.io.IOException;
 import java.nio.channels.Channels;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.parquet.avro.AvroParquetReader;
+import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.io.DelegatingSeekableInputStream;
 import org.apache.parquet.io.InputFile;
 import org.apache.parquet.io.SeekableInputStream;
@@ -33,11 +35,11 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 class ParquetUtils {
 
     static List<GenericRecord> readRecords(final Path tmpDir, final byte[] bytes) throws IOException {
-        final var records = new ArrayList<GenericRecord>();
-        final var parquetFile = tmpDir.resolve("parquet.file");
+        final List<GenericRecord> records = new ArrayList<GenericRecord>();
+        final Path parquetFile = tmpDir.resolve("parquet.file");
         FileUtils.writeByteArrayToFile(parquetFile.toFile(), bytes);
-        final var seekableByteChannel = Files.newByteChannel(parquetFile);
-        try (final var r = AvroParquetReader.<GenericRecord>builder(new InputFile() {
+        final SeekableByteChannel seekableByteChannel = Files.newByteChannel(parquetFile);
+        try (final ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new InputFile() {
             @Override
             public long getLength() throws IOException {
                 return seekableByteChannel.size();
@@ -59,7 +61,7 @@ class ParquetUtils {
             }
 
         }).withCompatibility(false).build()) {
-            var record = r.read();
+            GenericRecord record = r.read();
             while (record != null) {
                 records.add(record);
                 record = r.read();

@@ -43,6 +43,7 @@ import io.aiven.kafka.connect.gcs.testutils.BucketAccessor;
 import io.aiven.kafka.connect.gcs.testutils.Record;
 import io.aiven.kafka.connect.gcs.testutils.Utils;
 
+import com.google.api.gax.retrying.RetrySettings;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.contrib.nio.testing.LocalStorageHelper;
 import com.google.common.collect.Lists;
@@ -334,19 +335,19 @@ final class GcsSinkTaskTest {
         properties.put(GcsSinkConfig.FILE_COMPRESSION_TYPE_CONFIG, compression);
         final GcsSinkTask task = new GcsSinkTask(properties, storage);
 
-        task.put(List.of(
+        task.put(Arrays.asList(
             createRecord("topic0", 0, "key0", "value0", 100, 1000)));
-        task.put(List.of(
+        task.put(Arrays.asList(
             createRecord("topic0", 0, "key1", "value1", 101, 1001)));
         task.flush(null);
-        task.put(List.of(
+        task.put(Arrays.asList(
             createRecord("topic0", 0, "key2", "value2", 102, 1002)));
-        task.put(List.of(
+        task.put(Arrays.asList(
             createRecord("topic0", 0, "key3", "value3", 103, 1003)));
         task.flush(null);
-        task.put(List.of(
+        task.put(Arrays.asList(
             createRecord("topic0", 0, "key4", "value4", 104, 1004)));
-        task.put(List.of(
+        task.put(Arrays.asList(
             createRecord("topic0", 0, "key5", "value5", 105, 1005)));
         task.flush(null);
 
@@ -361,7 +362,7 @@ final class GcsSinkTaskTest {
         assertIterableEquals(
             Lists.newArrayList(Arrays.asList("value0"), Arrays.asList("value1")),
             readSplittedAndDecodedLinesFromBlob("topic0-0-100" + compressionType.extension(),
-                    compression, 0));
+                        compression, 0));
         assertIterableEquals(
             Lists.newArrayList(Arrays.asList("value2"), Arrays.asList("value3")),
             readSplittedAndDecodedLinesFromBlob("topic0-0-102" + compressionType.extension(),
@@ -400,20 +401,20 @@ final class GcsSinkTaskTest {
 
     @Test
     void setupDefaultRetryPolicy() throws Exception {
-        final var mockedContext = mock(SinkTaskContext.class);
-        final var task = new GcsSinkTask();
+        final SinkTaskContext mockedContext = mock(SinkTaskContext.class);
+        final GcsSinkTask task = new GcsSinkTask();
         task.initialize(mockedContext);
 
-        final var props = Map.of(
-                "gcs.bucket.name", "the_bucket",
-                "gcs.credentials.path",
-                    getClass().getClassLoader().getResource("test_gcs_credentials.json").getPath()
-        );
+        final Map<String, String> props = new HashMap<String, String>() {{
+                put("gcs.bucket.name", "the_bucket");
+                put("gcs.credentials.path",
+                    getClass().getClassLoader().getResource("test_gcs_credentials.json").getPath());
+            }};
 
         task.start(props);
 
-        final var storage =  FieldSupport.EXTRACTION.fieldValue("storage", Storage.class, task);
-        final var retrySettings = storage.getOptions().getRetrySettings();
+        final Storage storage =  FieldSupport.EXTRACTION.fieldValue("storage", Storage.class, task);
+        final RetrySettings retrySettings = storage.getOptions().getRetrySettings();
 
         verify(mockedContext, never()).timeout(anyLong());
 
@@ -433,27 +434,27 @@ final class GcsSinkTaskTest {
 
     @Test
     void setupCustomRetryPolicy() throws Exception {
-        final var mockedContext = mock(SinkTaskContext.class);
-        final var kafkaBackoffMsCaptor = ArgumentCaptor.forClass(Long.class);
-        final var task = new GcsSinkTask();
+        final SinkTaskContext mockedContext = mock(SinkTaskContext.class);
+        final ArgumentCaptor<Long> kafkaBackoffMsCaptor = ArgumentCaptor.forClass(Long.class);
+        final GcsSinkTask task = new GcsSinkTask();
         task.initialize(mockedContext);
 
-        final var props = Map.of(
-                "gcs.bucket.name", "the_bucket",
-                "gcs.credentials.path",
-                    getClass().getClassLoader().getResource("test_gcs_credentials.json").getPath(),
-                "kafka.retry.backoff.ms", "1",
-                "gcs.retry.backoff.initial.delay.ms", "2",
-                "gcs.retry.backoff.max.delay.ms", "3",
-                "gcs.retry.backoff.delay.multiplier", "4",
-                "gcs.retry.backoff.total.timeout.ms", "5",
-                "gcs.retry.backoff.max.attempts", "6"
-        );
+        final Map<String, String> props = new HashMap<String, String>() {{
+                put("gcs.bucket.name", "the_bucket");
+                put("gcs.credentials.path",
+                    getClass().getClassLoader().getResource("test_gcs_credentials.json").getPath());
+                put("kafka.retry.backoff.ms", "1");
+                put("gcs.retry.backoff.initial.delay.ms", "2");
+                put("gcs.retry.backoff.max.delay.ms", "3");
+                put("gcs.retry.backoff.delay.multiplier", "4");
+                put("gcs.retry.backoff.total.timeout.ms", "5");
+                put("gcs.retry.backoff.max.attempts", "6");
+            }};
 
         task.start(props);
 
-        final var storage =  FieldSupport.EXTRACTION.fieldValue("storage", Storage.class, task);
-        final var retrySettings = storage.getOptions().getRetrySettings();
+        final Storage storage =  FieldSupport.EXTRACTION.fieldValue("storage", Storage.class, task);
+        final RetrySettings retrySettings = storage.getOptions().getRetrySettings();
 
         verify(mockedContext).timeout(kafkaBackoffMsCaptor.capture());
 

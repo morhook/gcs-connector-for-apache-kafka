@@ -16,6 +16,7 @@
 
 package io.aiven.kafka.connect.gcs;
 
+import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.util.Collection;
 import java.util.List;
@@ -115,8 +116,8 @@ public final class GcsSinkTask extends SinkTask {
         final BlobInfo blob = BlobInfo
                 .newBuilder(config.getBucketName(), config.getPrefix() + filename)
                 .build();
-        try (final var out = Channels.newOutputStream(storage.writer(blob));
-             final var writer = OutputWriter.builder()
+        try (final OutputStream out = Channels.newOutputStream(storage.writer(blob));
+             final OutputWriter writer = OutputWriter.builder()
                      .withExternalProperties(config.originalsStrings())
                      .withOutputFields(config.getOutputFields())
                      .withCompressionType(config.getCompressionType())

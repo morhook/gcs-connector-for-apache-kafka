@@ -117,7 +117,7 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
     @Test
     final void allOutputFields(@TempDir final Path tmpDir)
             throws ExecutionException, InterruptedException, IOException {
-        final var compression = "none";
+        final String compression = "none";
         final Map<String, String> connectorConfig = basicConnectorConfig(compression);
         connectorConfig.put("format.output.fields", "key,value,offset,timestamp,headers");
         connectorConfig.put("format.output.fields.value.encoding", "none");
@@ -134,7 +134,7 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
         int cnt = 0;
         for (int i = 0; i < 10; i++) {
             for (int partition = 0; partition < 4; partition++) {
-                final var key = "key-" + cnt;
+                final String key = "key-" + cnt;
                 final GenericRecord value = new GenericData.Record(valueSchema);
                 value.put("name", "user-" + cnt);
                 value.put("value", "value-" + cnt);
@@ -150,7 +150,7 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
         // TODO more robust way to detect that Connect finished processing
         Thread.sleep(OFFSET_FLUSH_INTERVAL_MS * 2);
 
-        final List<String> expectedBlobs = List.of(
+        final List<String> expectedBlobs = Arrays.asList(
                 getBlobName(0, 0, compression),
                 getBlobName(1, 0, compression),
                 getBlobName(2, 0, compression),
@@ -159,7 +159,7 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
 
         final Map<String, List<GenericRecord>> blobContents = new HashMap<>();
         for (final String blobName : expectedBlobs) {
-            final var records =
+            final List<GenericRecord> records =
                     ParquetUtils.readRecords(
                             tmpDir.resolve(Paths.get(blobName)),
                             testBucketAccessor.readBytes(blobName)
@@ -169,12 +169,12 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
         cnt = 0;
         for (int i = 0; i < 10; i++) {
             for (int partition = 0; partition < 4; partition++) {
-                final var name = "user-" + cnt;
-                final var value = "value-" + cnt;
+                final String name = "user-" + cnt;
+                final String value = "value-" + cnt;
                 final String blobName = getBlobName(partition, 0, "none");
                 final GenericRecord record = blobContents.get(blobName).get(i);
-                final var expectedKey = "key-" + cnt;
-                final var expectedValue = "{\"name\": \"" + name + "\", \"value\": \"" + value + "\"}";
+                final String expectedKey = "key-" + cnt;
+                final String expectedValue = "{\"name\": \"" + name + "\", \"value\": \"" + value + "\"}";
                 assertEquals(expectedKey, record.get("key").toString());
                 assertEquals(expectedValue, record.get("value").toString());
                 assertNotNull(record.get("offset"));
@@ -205,7 +205,7 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
         int cnt = 0;
         for (int i = 0; i < 10; i++) {
             for (int partition = 0; partition < 4; partition++) {
-                final var key = "key-" + cnt;
+                final String key = "key-" + cnt;
                 final GenericRecord value = new GenericData.Record(valueSchema);
                 value.put("name", "user-" + cnt);
                 value.put("value", "value-" + cnt);
@@ -221,7 +221,7 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
         // TODO more robust way to detect that Connect finished processing
         Thread.sleep(OFFSET_FLUSH_INTERVAL_MS * 2);
 
-        final List<String> expectedBlobs = List.of(
+        final List<String> expectedBlobs = Arrays.asList(
                 getBlobName(0, 0, compression),
                 getBlobName(1, 0, compression),
                 getBlobName(2, 0, compression),
@@ -230,7 +230,7 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
 
         final Map<String, List<GenericRecord>> blobContents = new HashMap<>();
         for (final String blobName : expectedBlobs) {
-            final var records =
+            final List<GenericRecord> records =
                     ParquetUtils.readRecords(
                             tmpDir.resolve(Paths.get(blobName)),
                             testBucketAccessor.readBytes(blobName)
@@ -240,11 +240,11 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
         cnt = 0;
         for (int i = 0; i < 10; i++) {
             for (int partition = 0; partition < 4; partition++) {
-                final var name = "user-" + cnt;
-                final var value = "value-" + cnt;
+                final String name = "user-" + cnt;
+                final String value = "value-" + cnt;
                 final String blobName = getBlobName(partition, 0, "none");
                 final GenericRecord record = blobContents.get(blobName).get(i);
-                final var recordValue = (GenericRecord) record.get("value");
+                final GenericRecord recordValue = (GenericRecord) record.get("value");
                 assertEquals(name, recordValue.get("name").toString());
                 assertEquals(value, recordValue.get("value").toString());
                 cnt += 1;
@@ -278,10 +278,10 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
 
         final List<Future<RecordMetadata>> sendFutures = new ArrayList<>();
         int cnt = 0;
-        final var expectedRecords = new ArrayList<String>();
+        final List<String> expectedRecords = new ArrayList<String>();
         for (int i = 0; i < 10; i++) {
             for (int partition = 0; partition < 4; partition++) {
-                final var key = "key-" + cnt;
+                final String key = "key-" + cnt;
                 final GenericRecord value;
                 if (i < 5) {
                     value = new GenericData.Record(valueSchema);
@@ -318,9 +318,9 @@ final class AvroParquetIntegrationTest extends AbstractIntegrationTest {
         );
         assertIterableEquals(expectedBlobs, testBucketAccessor.getBlobNames(gcsPrefix));
 
-        final var blobContents = new ArrayList<String>();
+        final List<String> blobContents = new ArrayList<String>();
         for (final String blobName : expectedBlobs) {
-            final var records =
+            final List<GenericRecord> records =
                     ParquetUtils.readRecords(
                             tmpDir.resolve(Paths.get(blobName)),
                             testBucketAccessor.readBytes(blobName)
