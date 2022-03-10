@@ -152,10 +152,12 @@ final class GcsSinkConfigTest {
 
     @Test
     void emptyGcsBucketName() {
-        final Map<String, String> properties = new HashMap<String, String>();
+        final Map<String, String> properties = new HashMap<String, String>() {{
+                put("gcs.bucket.name", "");    
+            }};
 
         final String expectedErrorMessage =
-            "Missing required configuration \"gcs.bucket.name\" which has no default value.";
+            "Invalid value  for configuration gcs.bucket.name: String must be non-empty";
 
         expectErrorMessageForConfigurationInConfigDefValidation(
             properties, "gcs.bucket.name", expectedErrorMessage);
