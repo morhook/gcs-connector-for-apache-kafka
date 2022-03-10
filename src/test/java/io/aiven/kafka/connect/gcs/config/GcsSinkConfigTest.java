@@ -155,7 +155,7 @@ final class GcsSinkConfigTest {
         final Map<String, String> properties = new HashMap<String, String>();
 
         final String expectedErrorMessage =
-            "Invalid value  for configuration gcs.bucket.name: String must be non-empty";
+            "Missing required configuration \"gcs.bucket.name\" which has no default value.";
 
         expectErrorMessageForConfigurationInConfigDefValidation(
             properties, "gcs.bucket.name", expectedErrorMessage);
@@ -267,6 +267,7 @@ final class GcsSinkConfigTest {
                         + "Value must be at least 0", maxAttemptsE.getMessage());
 
         final Map<String, String> totalTimeoutProp = new HashMap<String, String>() {{ 
+                put("gcs.bucket.name", "test-bucket");
                 put("gcs.retry.backoff.total.timeout.ms", "-1");
             }};
         final ConfigException totalTimeoutE =
@@ -276,6 +277,7 @@ final class GcsSinkConfigTest {
                         + "Value must be at least 0", totalTimeoutE.getMessage());
 
         final Map<String, String> tooBigTotoalTimeoutProp = new HashMap<String, String>() {{
+                put("gcs.bucket.name", "test-bucket");
                 put("gcs.retry.backoff.total.timeout.ms", String.valueOf(TimeUnit.HOURS.toMillis(25)));
             }};
 
@@ -799,7 +801,7 @@ final class GcsSinkConfigTest {
 
         final String expectedErrorMessage = "Invalid value {{:padding=true}}-{{partition}}-{{topic}} "
             + "for configuration file.name.template: "
-            + "Variable name has't been set for template: {{:padding=true}}-{{partition}}-{{topic}}";
+            + "Variable name hasn't been set for template: {{:padding=true}}-{{partition}}-{{topic}}";
 
         expectErrorMessageForConfigurationInConfigDefValidation(
             properties, "file.name.template", expectedErrorMessage);

@@ -400,7 +400,7 @@ public final class GcsSinkConfig extends AivenCommonConfig {
 
             final Pattern unitYyyyPattern = Pattern.compile("\\{\\{\\s*timestamp\\s*:\\s*unit\\s*=\\s*YYYY\\s*}}");
             template = unitYyyyPattern.matcher(template)
-                .replaceAll("{{timestamp: unit=yyyy}}");
+                .replaceAll("{{timestamp:unit=yyyy}}");
 
             if (!template.equals(originalTemplate)) {
                 log.warn("{{timestamp:unit=YYYY}} is no longer supported, "
