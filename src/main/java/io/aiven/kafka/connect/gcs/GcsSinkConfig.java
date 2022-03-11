@@ -145,7 +145,7 @@ public final class GcsSinkConfig extends AivenCommonConfig {
     }
 
     private static void addGcsRetryPolicies(final ConfigDef configDef) {
-        var retryPolicyGroupCounter = 0;
+        int retryPolicyGroupCounter = 0;
         configDef.define(
                 GCS_RETRY_BACKOFF_INITIAL_DELAY_MS_CONFIG,
                 ConfigDef.Type.LONG,
@@ -212,7 +212,7 @@ public final class GcsSinkConfig extends AivenCommonConfig {
                             return;
                         }
                         assert value instanceof Long;
-                        final var longValue = (Long) value;
+                        final Long longValue = (Long) value;
                         if (longValue < 0) {
                             throw new ConfigException(name, value, "Value must be at least 0");
                         } else if (longValue > TOTAL_TIME_MAX) {
@@ -393,14 +393,14 @@ public final class GcsSinkConfig extends AivenCommonConfig {
 
     static Map<String, String> handleDeprecatedYyyyUppercase(final Map<String, String> properties) {
         if (properties.containsKey(FILE_NAME_TEMPLATE_CONFIG)) {
-            final var result = new HashMap<>(properties);
+            final Map<String, String> result = new HashMap<>(properties);
 
             String template = properties.get(FILE_NAME_TEMPLATE_CONFIG);
             final String originalTemplate = template;
 
-            final var unitYyyyPattern = Pattern.compile("\\{\\{\\s*timestamp\\s*:\\s*unit\\s*=\\s*YYYY\\s*}}");
+            final Pattern unitYyyyPattern = Pattern.compile("\\{\\{\\s*timestamp\\s*:\\s*unit\\s*=\\s*YYYY\\s*}}");
             template = unitYyyyPattern.matcher(template)
-                .replaceAll(matchResult -> matchResult.group().replace("YYYY", "yyyy"));
+                .replaceAll("{{timestamp:unit=yyyy}}");
 
             if (!template.equals(originalTemplate)) {
                 log.warn("{{timestamp:unit=YYYY}} is no longer supported, "
